@@ -1,0 +1,775 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "761f2893",
+   "metadata": {
+    "_cell_guid": "b1076dfc-b9ad-4769-8c92-a6c4dae69d19",
+    "_uuid": "8f2839f25d086af736a60e9eeb907d3b93b6e0e5",
+    "execution": {
+     "iopub.execute_input": "2025-01-20T20:44:55.697509Z",
+     "iopub.status.busy": "2025-01-20T20:44:55.697039Z",
+     "iopub.status.idle": "2025-01-20T20:44:56.730876Z",
+     "shell.execute_reply": "2025-01-20T20:44:56.729031Z"
+    },
+    "papermill": {
+     "duration": 1.04117,
+     "end_time": "2025-01-20T20:44:56.732953",
+     "exception": false,
+     "start_time": "2025-01-20T20:44:55.691783",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "/kaggle/input/apple-sales-dataset-2024/apple_sales_2024.csv\n"
+     ]
+    }
+   ],
+   "source": [
+    "# This Python 3 environment comes with many helpful analytics libraries installed\n",
+    "# It is defined by the kaggle/python Docker image: https://github.com/kaggle/docker-python\n",
+    "# For example, here's several helpful packages to load\n",
+    "\n",
+    "import numpy as np # linear algebra\n",
+    "import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)\n",
+    "\n",
+    "# Input data files are available in the read-only \"../input/\" directory\n",
+    "# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory\n",
+    "\n",
+    "import os\n",
+    "for dirname, _, filenames in os.walk('/kaggle/input'):\n",
+    "    for filename in filenames:\n",
+    "        print(os.path.join(dirname, filename))\n",
+    "\n",
+    "# You can write up to 20GB to the current directory (/kaggle/working/) that gets preserved as output when you create a version using \"Save & Run All\" \n",
+    "# You can also write temporary files to /kaggle/temp/, but they won't be saved outside of the current session"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "0bd3887a",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-01-20T20:44:56.741454Z",
+     "iopub.status.busy": "2025-01-20T20:44:56.740869Z",
+     "iopub.status.idle": "2025-01-20T20:44:56.787798Z",
+     "shell.execute_reply": "2025-01-20T20:44:56.786568Z"
+    },
+    "papermill": {
+     "duration": 0.052844,
+     "end_time": "2025-01-20T20:44:56.789635",
+     "exception": false,
+     "start_time": "2025-01-20T20:44:56.736791",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>State</th>\n",
+       "      <th>Region</th>\n",
+       "      <th>iPhone Sales (in million units)</th>\n",
+       "      <th>iPad Sales (in million units)</th>\n",
+       "      <th>Mac Sales (in million units)</th>\n",
+       "      <th>Wearables (in million units)</th>\n",
+       "      <th>Services Revenue (in billion $)</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>Chongqing</td>\n",
+       "      <td>Greater China</td>\n",
+       "      <td>7.46</td>\n",
+       "      <td>6.75</td>\n",
+       "      <td>1.19</td>\n",
+       "      <td>5.88</td>\n",
+       "      <td>15.88</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>Germany</td>\n",
+       "      <td>Europe</td>\n",
+       "      <td>8.63</td>\n",
+       "      <td>14.06</td>\n",
+       "      <td>7.03</td>\n",
+       "      <td>7.42</td>\n",
+       "      <td>10.12</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>UK</td>\n",
+       "      <td>Europe</td>\n",
+       "      <td>5.61</td>\n",
+       "      <td>14.09</td>\n",
+       "      <td>8.78</td>\n",
+       "      <td>8.19</td>\n",
+       "      <td>19.85</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>Shanghai</td>\n",
+       "      <td>Greater China</td>\n",
+       "      <td>7.82</td>\n",
+       "      <td>7.97</td>\n",
+       "      <td>9.78</td>\n",
+       "      <td>2.28</td>\n",
+       "      <td>6.16</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>Thailand</td>\n",
+       "      <td>Rest of Asia</td>\n",
+       "      <td>16.70</td>\n",
+       "      <td>8.13</td>\n",
+       "      <td>6.46</td>\n",
+       "      <td>3.48</td>\n",
+       "      <td>13.29</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "       State         Region  iPhone Sales (in million units)  \\\n",
+       "0  Chongqing  Greater China                             7.46   \n",
+       "1    Germany         Europe                             8.63   \n",
+       "2         UK         Europe                             5.61   \n",
+       "3   Shanghai  Greater China                             7.82   \n",
+       "4   Thailand   Rest of Asia                            16.70   \n",
+       "\n",
+       "   iPad Sales (in million units)  Mac Sales (in million units)  \\\n",
+       "0                           6.75                          1.19   \n",
+       "1                          14.06                          7.03   \n",
+       "2                          14.09                          8.78   \n",
+       "3                           7.97                          9.78   \n",
+       "4                           8.13                          6.46   \n",
+       "\n",
+       "   Wearables (in million units)  Services Revenue (in billion $)  \n",
+       "0                          5.88                            15.88  \n",
+       "1                          7.42                            10.12  \n",
+       "2                          8.19                            19.85  \n",
+       "3                          2.28                             6.16  \n",
+       "4                          3.48                            13.29  "
+      ]
+     },
+     "execution_count": 2,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df = pd.read_csv('/kaggle/input/apple-sales-dataset-2024/apple_sales_2024.csv')\n",
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "8db34a08",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-01-20T20:44:56.797809Z",
+     "iopub.status.busy": "2025-01-20T20:44:56.797373Z",
+     "iopub.status.idle": "2025-01-20T20:44:56.814164Z",
+     "shell.execute_reply": "2025-01-20T20:44:56.812771Z"
+    },
+    "papermill": {
+     "duration": 0.0232,
+     "end_time": "2025-01-20T20:44:56.816295",
+     "exception": false,
+     "start_time": "2025-01-20T20:44:56.793095",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>State</th>\n",
+       "      <th>Region</th>\n",
+       "      <th>iphone_sales</th>\n",
+       "      <th>ipad_sales</th>\n",
+       "      <th>Mac_sales</th>\n",
+       "      <th>Wearables_sales</th>\n",
+       "      <th>Service_Revenue</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>Chongqing</td>\n",
+       "      <td>Greater China</td>\n",
+       "      <td>7.46</td>\n",
+       "      <td>6.75</td>\n",
+       "      <td>1.19</td>\n",
+       "      <td>5.88</td>\n",
+       "      <td>15.88</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>Germany</td>\n",
+       "      <td>Europe</td>\n",
+       "      <td>8.63</td>\n",
+       "      <td>14.06</td>\n",
+       "      <td>7.03</td>\n",
+       "      <td>7.42</td>\n",
+       "      <td>10.12</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>UK</td>\n",
+       "      <td>Europe</td>\n",
+       "      <td>5.61</td>\n",
+       "      <td>14.09</td>\n",
+       "      <td>8.78</td>\n",
+       "      <td>8.19</td>\n",
+       "      <td>19.85</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>Shanghai</td>\n",
+       "      <td>Greater China</td>\n",
+       "      <td>7.82</td>\n",
+       "      <td>7.97</td>\n",
+       "      <td>9.78</td>\n",
+       "      <td>2.28</td>\n",
+       "      <td>6.16</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>Thailand</td>\n",
+       "      <td>Rest of Asia</td>\n",
+       "      <td>16.70</td>\n",
+       "      <td>8.13</td>\n",
+       "      <td>6.46</td>\n",
+       "      <td>3.48</td>\n",
+       "      <td>13.29</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "       State         Region  iphone_sales  ipad_sales  Mac_sales  \\\n",
+       "0  Chongqing  Greater China          7.46        6.75       1.19   \n",
+       "1    Germany         Europe          8.63       14.06       7.03   \n",
+       "2         UK         Europe          5.61       14.09       8.78   \n",
+       "3   Shanghai  Greater China          7.82        7.97       9.78   \n",
+       "4   Thailand   Rest of Asia         16.70        8.13       6.46   \n",
+       "\n",
+       "   Wearables_sales  Service_Revenue  \n",
+       "0             5.88            15.88  \n",
+       "1             7.42            10.12  \n",
+       "2             8.19            19.85  \n",
+       "3             2.28             6.16  \n",
+       "4             3.48            13.29  "
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df.rename(columns={'iPhone Sales (in million units)': 'iphone_sales',\n",
+    "                  'iPad Sales (in million units)': 'ipad_sales',\n",
+    "                  'Mac Sales (in million units)':'Mac_sales',\n",
+    "                  'Wearables (in million units)': 'Wearables_sales',\n",
+    "                  'Services Revenue (in billion $)': 'Service_Revenue'}, inplace=True)\n",
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "dd883c93",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-01-20T20:44:56.825040Z",
+     "iopub.status.busy": "2025-01-20T20:44:56.824616Z",
+     "iopub.status.idle": "2025-01-20T20:44:56.837957Z",
+     "shell.execute_reply": "2025-01-20T20:44:56.836964Z"
+    },
+    "papermill": {
+     "duration": 0.019461,
+     "end_time": "2025-01-20T20:44:56.839551",
+     "exception": false,
+     "start_time": "2025-01-20T20:44:56.820090",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "State               25\n",
+       "Region               5\n",
+       "iphone_sales       824\n",
+       "ipad_sales         692\n",
+       "Mac_sales          595\n",
+       "Wearables_sales    639\n",
+       "Service_Revenue    741\n",
+       "dtype: int64"
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df.nunique()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "fc5cdca4",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-01-20T20:44:56.848368Z",
+     "iopub.status.busy": "2025-01-20T20:44:56.848027Z",
+     "iopub.status.idle": "2025-01-20T20:44:58.271829Z",
+     "shell.execute_reply": "2025-01-20T20:44:58.267085Z"
+    },
+    "papermill": {
+     "duration": 1.430963,
+     "end_time": "2025-01-20T20:44:58.274303",
+     "exception": false,
+     "start_time": "2025-01-20T20:44:56.843340",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Column: State\n",
+      "0 -> Australia\n",
+      "1 -> Beijing\n",
+      "2 -> Brazil\n",
+      "3 -> California\n",
+      "4 -> Canada\n",
+      "5 -> Chongqing\n",
+      "6 -> Florida\n",
+      "7 -> France\n",
+      "8 -> Germany\n",
+      "9 -> Hong Kong\n",
+      "10 -> Illinois\n",
+      "11 -> India\n",
+      "12 -> Indonesia\n",
+      "13 -> Italy\n",
+      "14 -> Japan\n",
+      "15 -> Mexico\n",
+      "16 -> New York\n",
+      "17 -> Shanghai\n",
+      "18 -> Shenzhen\n",
+      "19 -> South Africa\n",
+      "20 -> South Korea\n",
+      "21 -> Spain\n",
+      "22 -> Texas\n",
+      "23 -> Thailand\n",
+      "24 -> UK\n",
+      "\n",
+      "Column: Region\n",
+      "0 -> Europe\n",
+      "1 -> Greater China\n",
+      "2 -> North America\n",
+      "3 -> Rest of Asia\n",
+      "4 -> Rest of World\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "from sklearn.preprocessing import LabelEncoder\n",
+    "encoder = LabelEncoder()\n",
+    "\n",
+    "label_mappings = {}\n",
+    "\n",
+    "for col in df.select_dtypes('object'):\n",
+    "    df[col] = encoder.fit_transform(df[col])\n",
+    "    label_mappings[col] = dict(zip(encoder.classes_, encoder.transform(encoder.classes_)))\n",
+    "\n",
+    "for col, mapping in label_mappings.items():\n",
+    "    print(f\"Column: {col}\")\n",
+    "    for label, code in mapping.items():\n",
+    "        print(f\"{code} -> {label}\")\n",
+    "    print()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "4312d3a9",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-01-20T20:44:58.283860Z",
+     "iopub.status.busy": "2025-01-20T20:44:58.283243Z",
+     "iopub.status.idle": "2025-01-20T20:44:58.297135Z",
+     "shell.execute_reply": "2025-01-20T20:44:58.295871Z"
+    },
+    "papermill": {
+     "duration": 0.020729,
+     "end_time": "2025-01-20T20:44:58.299226",
+     "exception": false,
+     "start_time": "2025-01-20T20:44:58.278497",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>State</th>\n",
+       "      <th>Region</th>\n",
+       "      <th>iphone_sales</th>\n",
+       "      <th>ipad_sales</th>\n",
+       "      <th>Mac_sales</th>\n",
+       "      <th>Wearables_sales</th>\n",
+       "      <th>Service_Revenue</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>5</td>\n",
+       "      <td>1</td>\n",
+       "      <td>7.46</td>\n",
+       "      <td>6.75</td>\n",
+       "      <td>1.19</td>\n",
+       "      <td>5.88</td>\n",
+       "      <td>15.88</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>8</td>\n",
+       "      <td>0</td>\n",
+       "      <td>8.63</td>\n",
+       "      <td>14.06</td>\n",
+       "      <td>7.03</td>\n",
+       "      <td>7.42</td>\n",
+       "      <td>10.12</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>24</td>\n",
+       "      <td>0</td>\n",
+       "      <td>5.61</td>\n",
+       "      <td>14.09</td>\n",
+       "      <td>8.78</td>\n",
+       "      <td>8.19</td>\n",
+       "      <td>19.85</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>17</td>\n",
+       "      <td>1</td>\n",
+       "      <td>7.82</td>\n",
+       "      <td>7.97</td>\n",
+       "      <td>9.78</td>\n",
+       "      <td>2.28</td>\n",
+       "      <td>6.16</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>23</td>\n",
+       "      <td>3</td>\n",
+       "      <td>16.70</td>\n",
+       "      <td>8.13</td>\n",
+       "      <td>6.46</td>\n",
+       "      <td>3.48</td>\n",
+       "      <td>13.29</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   State  Region  iphone_sales  ipad_sales  Mac_sales  Wearables_sales  \\\n",
+       "0      5       1          7.46        6.75       1.19             5.88   \n",
+       "1      8       0          8.63       14.06       7.03             7.42   \n",
+       "2     24       0          5.61       14.09       8.78             8.19   \n",
+       "3     17       1          7.82        7.97       9.78             2.28   \n",
+       "4     23       3         16.70        8.13       6.46             3.48   \n",
+       "\n",
+       "   Service_Revenue  \n",
+       "0            15.88  \n",
+       "1            10.12  \n",
+       "2            19.85  \n",
+       "3             6.16  \n",
+       "4            13.29  "
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "d5efcd79",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-01-20T20:44:58.309113Z",
+     "iopub.status.busy": "2025-01-20T20:44:58.308706Z",
+     "iopub.status.idle": "2025-01-20T20:44:58.436227Z",
+     "shell.execute_reply": "2025-01-20T20:44:58.435060Z"
+    },
+    "papermill": {
+     "duration": 0.135035,
+     "end_time": "2025-01-20T20:44:58.438660",
+     "exception": false,
+     "start_time": "2025-01-20T20:44:58.303625",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "from sklearn.model_selection import train_test_split, GridSearchCV\n",
+    "from sklearn.metrics import mean_squared_error\n",
+    "X = df.drop('Service_Revenue', axis = 1)\n",
+    "y = df['Service_Revenue']\n",
+    "\n",
+    "X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "faf0e20d",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-01-20T20:44:58.448680Z",
+     "iopub.status.busy": "2025-01-20T20:44:58.448235Z",
+     "iopub.status.idle": "2025-01-20T20:44:58.737763Z",
+     "shell.execute_reply": "2025-01-20T20:44:58.736546Z"
+    },
+    "papermill": {
+     "duration": 0.296975,
+     "end_time": "2025-01-20T20:44:58.740033",
+     "exception": false,
+     "start_time": "2025-01-20T20:44:58.443058",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "from xgboost import XGBRegressor\n",
+    "\n",
+    "params = {\n",
+    "    'n_estimators': [200, 500, 1000],\n",
+    "    'max_depth': [4, 8, 12],\n",
+    "    'learning_rate': [0.01, 0.05, 0.1],\n",
+    "    'scoring': 'reg:squarederror'\n",
+    "}"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "a227cbd0",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-01-20T20:44:58.749220Z",
+     "iopub.status.busy": "2025-01-20T20:44:58.748851Z",
+     "iopub.status.idle": "2025-01-20T20:44:58.937595Z",
+     "shell.execute_reply": "2025-01-20T20:44:58.935154Z"
+    },
+    "papermill": {
+     "duration": 0.195517,
+     "end_time": "2025-01-20T20:44:58.939671",
+     "exception": false,
+     "start_time": "2025-01-20T20:44:58.744154",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "mean squared error is  24.287649869324895\n",
+      "CPU times: user 583 ms, sys: 21.6 ms, total: 605 ms\n",
+      "Wall time: 181 ms\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%time\n",
+    "XG_model = XGBRegressor()\n",
+    "#model = GridSearchCV(XG_model, params, cv=5, scoring='r2')\n",
+    "XG_model.fit(X_train, y_train)\n",
+    "y_pred = XG_model.predict(X_val)\n",
+    "\n",
+    "error = mean_squared_error(y_val, y_pred)\n",
+    "print('mean squared error is ', error)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "2b8ad25b",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-01-20T20:44:58.950401Z",
+     "iopub.status.busy": "2025-01-20T20:44:58.950093Z",
+     "iopub.status.idle": "2025-01-20T20:44:59.117989Z",
+     "shell.execute_reply": "2025-01-20T20:44:59.116525Z"
+    },
+    "papermill": {
+     "duration": 0.17572,
+     "end_time": "2025-01-20T20:44:59.120242",
+     "exception": false,
+     "start_time": "2025-01-20T20:44:58.944522",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "mean squared error is  18.7314659261038\n"
+     ]
+    }
+   ],
+   "source": [
+    "from sklearn.linear_model import LinearRegression\n",
+    "\n",
+    "linear_model = LinearRegression()\n",
+    "linear_model.fit(X_train, y_train)\n",
+    "y_pred_linear = linear_model.predict(X_val)\n",
+    "\n",
+    "Linear_error = mean_squared_error(y_val, y_pred_linear)\n",
+    "print('mean squared error is ', Linear_error)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kaggle": {
+   "accelerator": "none",
+   "dataSources": [
+    {
+     "datasetId": 6513706,
+     "sourceId": 10524560,
+     "sourceType": "datasetVersion"
+    }
+   ],
+   "dockerImageVersionId": 30839,
+   "isGpuEnabled": false,
+   "isInternetEnabled": true,
+   "language": "python",
+   "sourceType": "notebook"
+  },
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.10.12"
+  },
+  "papermill": {
+   "default_parameters": {},
+   "duration": 7.513497,
+   "end_time": "2025-01-20T20:45:00.151743",
+   "environment_variables": {},
+   "exception": null,
+   "input_path": "__notebook__.ipynb",
+   "output_path": "__notebook__.ipynb",
+   "parameters": {},
+   "start_time": "2025-01-20T20:44:52.638246",
+   "version": "2.6.0"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
